@@ -7,8 +7,7 @@ import 'home_page.dart';
 class HomeModule extends Module {
   @override
   final List<Bind> binds = [
-    Bind.instance<FlutterBluetoothSerial>(FlutterBluetoothSerial.instance),
-    Bind.singleton((i) => HomeStore(bluethoot: i.get())),
+    Bind.singleton((i) => HomeStore()),
   ];
 
   @override

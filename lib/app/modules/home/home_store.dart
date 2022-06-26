@@ -11,12 +11,11 @@ abstract class HomeStoreBase with Store {
   BluetoothConnection? connection;
   int? deviceState;
   bool isDisconnecting = false;
-  FlutterBluetoothSerial bluethoot = Modular.get();
   bool get isConnected => connection != null && connection!.isConnected;
   List<BluetoothDevice> devicesList = [];
   BluetoothDevice? device;
   bool connected = false;
   bool isButtonUnavailable = false;
 
-  HomeStoreBase({required this.bluethoot});
+  HomeStoreBase();
 }

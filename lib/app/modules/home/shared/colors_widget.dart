@@ -56,7 +56,7 @@ class _ColorsWidgetState extends State<ColorsWidget> {
               },
               child: Container(
                 margin: const EdgeInsets.all(14),
-                width: 100,
+                width: MediaQuery.of(context).size.width * 0.4,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),

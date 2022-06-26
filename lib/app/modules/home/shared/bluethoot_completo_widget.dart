@@ -23,6 +23,7 @@ class BluethootCompletoWidget extends StatefulWidget {
 
 class _BluethootCompletoWidgetState extends State<BluethootCompletoWidget> {
   HomeStore store = Modular.get();
+  FlutterBluetoothSerial bluetooth = FlutterBluetoothSerial.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   startBluethoot() {
@@ -80,7 +81,7 @@ class _BluethootCompletoWidgetState extends State<BluethootCompletoWidget> {
     List<BluetoothDevice> devices = [];
 
     try {
-      devices = await store.bluethoot.getBondedDevices();
+      devices = await bluetooth.getBondedDevices();
     } on PlatformException {
       debugPrint("Error");
     }
@@ -94,7 +95,7 @@ class _BluethootCompletoWidgetState extends State<BluethootCompletoWidget> {
 
   refresh() {
     getPairedDevices().then((_) {
-      show('Device list refreshed');
+      show('Lista de dispositivo atualizada');
     });
   }
 
@@ -136,10 +137,33 @@ class _BluethootCompletoWidgetState extends State<BluethootCompletoWidget> {
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ),
-            ConectarWidget(
-              disconnect: disconnect,
-              connect: disconnect,
-              getDeviceItems: _getDeviceItems,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  const Text(
+                    'Dispositivo:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  DropdownButton(
+                    items: _getDeviceItems(),
+                    onChanged: (dynamic value) =>
+                        setState(() => store.device = value),
+                    value: store.devicesList.isNotEmpty ? store.device : null,
+                  ),
+                  ElevatedButton(
+                    onPressed: store.isButtonUnavailable
+                        ? null
+                        : store.connected
+                            ? disconnect
+                            : connect,
+                    child: Text(store.connected ? 'Disconectar' : 'Conectar'),
+                  ),
+                ],
+              ),
             ),
             widget.child!
           ],
@@ -170,7 +194,7 @@ class _BluethootCompletoWidgetState extends State<BluethootCompletoWidget> {
       store.isButtonUnavailable = true;
     });
     if (store.device == null) {
-      show('No device selected');
+      show('Dispositivo não selecionado');
     } else {
       if (!store.isConnected) {
         await BluetoothConnection.toAddress(store.device!.address)
@@ -192,10 +216,10 @@ class _BluethootCompletoWidgetState extends State<BluethootCompletoWidget> {
             }
           });
         }).catchError((error) {
-          debugPrint('Cannot connect, exception occurred');
+          debugPrint('Não foi possível conectar.');
           debugPrint(error);
         });
-        show('Device connected');
+        show('Dispositivo conectado');
 
         setState(() => store.isButtonUnavailable = false);
       }
@@ -209,7 +233,7 @@ class _BluethootCompletoWidgetState extends State<BluethootCompletoWidget> {
     });
 
     await store.connection!.close();
-    show('Device disconnected');
+    show('Dispositivo desconectado');
     if (!store.connection!.isConnected) {
       setState(() {
         store.connected = false;
@@ -221,7 +245,7 @@ class _BluethootCompletoWidgetState extends State<BluethootCompletoWidget> {
   void sendOnMessageToBluetooth() async {
     store.connection!.output.add(utf8.encode("g" "\r\n") as Uint8List);
     await store.connection!.output.allSent;
-    show('Device Turned On');
+    show('Dispositivo ligado');
     setState(() {
       store.deviceState = 1; // device on
     });
